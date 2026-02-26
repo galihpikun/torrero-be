@@ -5,6 +5,7 @@
   "description": "Todo list management web",
   "main": "index.js",
   "scripts": {
+    "build": "prisma generate",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "glihrakha",
