@@ -56,13 +56,13 @@ routeTask.get("/:taskId", async function (req, res) {
 
 routeTask.post("/", async function (req, res) {
   try {
-    const { title, status, priority, desc, deadline } = req.body;
+    const { title, status, priority, description, deadline } = req.body;
 
-    if (!(title && status && priority && desc && deadline)) {
+    if (!(title && status && priority && description && deadline)) {
       return res.status(400).json({
         code: 400,
         message:
-          "Tolong lengkapi semua data (title, desc, priority, deadline, status, user_id)",
+          "Tolong lengkapi semua data (title, description, priority, deadline, status, user_id)",
       });
     }
 
@@ -71,7 +71,7 @@ routeTask.post("/", async function (req, res) {
         title: title,
         status: status,
         priority: priority,
-        description: desc,
+        description: description,
         deadline: deadline,
       },
     });
@@ -92,9 +92,9 @@ routeTask.post("/", async function (req, res) {
 routeTask.put("/:taskId", async function (req, res) {
   try {
     const { taskId } = req.params;
-    const { title, status, priority, desc, deadline } = req.body;
+    const { title, status, priority, description, deadline } = req.body;
 
-    if (!(title && status && priority && desc && deadline)) {
+    if (!(title && status && priority && description && deadline)) {
       return res.status(400).json({
         code: 400,
         message:
@@ -123,7 +123,7 @@ routeTask.put("/:taskId", async function (req, res) {
         title: title,
         status: status,
         priority: priority,
-        description: desc,
+        description: description,
         deadline: deadline,
       },
     });
