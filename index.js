@@ -1,6 +1,6 @@
 import express from "express";
-import routeTask from "./routes/routeTask.js";
-import cors from "cors"
+import routeTask from "./src/routes/routeTask.js";
+import cors from "cors";
 
 const app = express();
 const port = 3000;
@@ -8,7 +8,7 @@ const port = 3000;
 app.use(cors());
 app.use(express.json());
 
-app.use('/task', routeTask)
+app.use("/task", routeTask);
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
