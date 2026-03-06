@@ -13,13 +13,27 @@ datasource db {
   
 }
 
-model Task { 
-  id Int @id @default(autoincrement()) 
-  title String 
-  description String 
-  priority String 
-  status String 
-  deadline DateTime? 
-  created_at DateTime @default(now()) 
+
+model Project {
+  id         Int      @id @default(autoincrement())
+  title      String
+  created_at DateTime @default(now())
+
+  tasks      Task[]
 }
+
+model Task {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String
+  priority    String
+  status      String
+  deadline    DateTime?
+  created_at  DateTime  @default(now())
+
+  project_id  Int
+  project     Project   @relation(fields: [project_id], references: [id])
+
+}
+
 

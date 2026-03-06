@@ -1,8 +1,17 @@
 import { prisma } from "../config/db.js";
 
 export const getTasks = async (req, res) => {
+  const {projectId} = req.params
+  
   try {
-    const tasks = await prisma.Task.findMany();
+    const tasks = await prisma.task.findMany({
+      where: {
+        project_id: parseInt(projectId)
+      },
+      orderBy:{
+        created_at:"asc"
+      }
+    });
     return res
       .status(200)
       .json({ code: 200, message: "Task berhasil ditemukan", data: tasks });
@@ -46,13 +55,13 @@ export const getTaskById = async (req, res) => {
 
 export const createTask = async (req,res) => {
     try {
-        const { title, status, priority, description, deadline } = req.body;
+        const { title, status, priority, description, deadline, project_id } = req.body;
     
-        if (!(title && status && priority && description && deadline)) {
+        if (!(title && status && priority && description && deadline && project_id)) {
           return res.status(400).json({
             code: 400,
             message:
-              "Tolong lengkapi semua data (title, description, priority, deadline, status, user_id)",
+              "Tolong lengkapi semua data (title, description, priority, deadline, status, project_id)",
           });
         }
     
@@ -63,10 +72,11 @@ export const createTask = async (req,res) => {
             priority: priority,
             description: description,
             deadline: deadline,
+            project_id:project_id
           },
         });
     
-        return res.status(201).send({
+        return res.status(201).json({
           code: 201,
           message: "Task berhasil dibuat",
           data: task,
