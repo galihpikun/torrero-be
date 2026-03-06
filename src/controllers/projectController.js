@@ -16,7 +16,7 @@ export const getProjects = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       code: 500,
-      message: error.message || "Terjadi kesalahan saat mengambil data",
+      message: error.message || "Terjadi kesalahan saat mengambil data projects",
     });
   }
 };
