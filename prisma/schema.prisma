@@ -13,11 +13,23 @@ datasource db {
   
 }
 
+model User {
+  id         Int       @id @default(autoincrement())
+  username   String
+  email      String    @unique
+  password   String
+  created_at DateTime  @default(now())
+
+  projects   Project[]
+}
 
 model Project {
   id         Int      @id @default(autoincrement())
   title      String
   created_at DateTime @default(now())
+
+  user_id    Int
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   tasks      Task[]
 }

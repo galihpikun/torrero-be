@@ -1,12 +1,16 @@
 import { prisma } from "../config/db.js";
 
 export const getTasks = async (req, res) => {
+  const userId= req.user.id;
   const {projectId} = req.params
   
   try {
     const tasks = await prisma.task.findMany({
       where: {
-        project_id: parseInt(projectId)
+        project_id: parseInt(projectId),
+        project:{
+          user_id:userId,
+        }
       },
       orderBy:{
         created_at:"asc"
@@ -24,14 +28,18 @@ export const getTasks = async (req, res) => {
 };
 
 export const getTaskById = async (req, res) => {
+    const userId= req.user.id;
     try {
         const { taskId } = req.params;
     
-        const task = await prisma.task.findUnique({
-          where: {
-            id: parseInt(taskId),
-          },
-        });
+        const task = await prisma.task.findFirst({
+      where: {
+        id: parseInt(taskId),
+        project: {
+          user_id: userId,
+        },
+      },
+    });
     
         if (!task) {
           return res.status(404).json({
@@ -53,43 +61,72 @@ export const getTaskById = async (req, res) => {
       }
 }
 
-export const createTask = async (req,res) => {
-    try {
-        const { title, status, priority, description, deadline, project_id } = req.body;
-    
-        if (!(title && status && priority && description && deadline && project_id)) {
-          return res.status(400).json({
-            code: 400,
-            message:
-              "Tolong lengkapi semua data (title, description, priority, deadline, status, project_id)",
-          });
-        }
-    
-        const task = await prisma.task.create({
-          data: {
-            title: title,
-            status: status,
-            priority: priority,
-            description: description,
-            deadline: deadline,
-            project_id:project_id
-          },
-        });
-    
-        return res.status(201).json({
-          code: 201,
-          message: "Task berhasil dibuat",
-          data: task,
-        });
-      } catch (error) {
-        return res.status(500).json({
-          code: 500,
-          message: error.message || "Terjadi kesalahan saat mengambil data",
-        });
-      }
-}
+export const createTask = async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    const {
+      title,
+      status,
+      priority,
+      description,
+      deadline,
+      project_id,
+    } = req.body;
+
+    if (
+      !(title && status && priority && description && deadline && project_id)
+    ) {
+      return res.status(400).json({
+        code: 400,
+        message:
+          "Tolong lengkapi semua data (title, description, priority, deadline, status, project_id)",
+      });
+    }
+
+    // cek project milik user
+    const project = await prisma.project.findFirst({
+      where: {
+        id: parseInt(project_id),
+        user_id: userId,
+      },
+    });
+
+    if (!project) {
+      return res.status(404).json({
+        code: 404,
+        message: "Project tidak ditemukan",
+      });
+    }
+
+    const task = await prisma.task.create({
+      data: {
+        title,
+        status,
+        priority,
+        description,
+        deadline,
+        project_id: parseInt(project_id),
+      },
+    });
+
+    return res.status(201).json({
+      code: 201,
+      message: "Task berhasil dibuat",
+      data: task,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      code: 500,
+      message: error.message || "Terjadi kesalahan",
+    });
+  }
+};
+
 
 export const editTask = async(req,res) => {
+  const userId = req.user.id;
+
     try {
     const { taskId } = req.params;
     const { title, status, priority, description, deadline } = req.body;
@@ -105,6 +142,9 @@ export const editTask = async(req,res) => {
     const taskExists = await prisma.task.findUnique({
       where: {
         id: parseInt(taskId),
+        project:{
+          user_id:userId,
+        }
       },
     });
 
@@ -141,13 +181,18 @@ export const editTask = async(req,res) => {
   }
 }
 
-export const deleteTask = async(req, res) => {
-     try {
+export const deleteTask = async (req, res) => {
+  const userId = req.user.id;
+
+  try {
     const { taskId } = req.params;
 
-    const taskExists = await prisma.task.findUnique({
+    const taskExists = await prisma.task.findFirst({
       where: {
         id: parseInt(taskId),
+        project: {
+          user_id: userId,
+        },
       },
     });
 
@@ -158,7 +203,7 @@ export const deleteTask = async(req, res) => {
       });
     }
 
-    const task = await prisma.task.delete({
+    await prisma.task.delete({
       where: {
         id: parseInt(taskId),
       },
@@ -166,12 +211,12 @@ export const deleteTask = async(req, res) => {
 
     return res.status(200).json({
       code: 200,
-      message: "task berhasil dihapus",
+      message: "Task berhasil dihapus",
     });
   } catch (error) {
     return res.status(500).json({
       code: 500,
-      message: error.message || "Terjadi kesalahan saat mengambil data",
+      message: error.message || "Terjadi kesalahan",
     });
   }
-}
+};
